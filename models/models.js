@@ -44,6 +44,8 @@ const ProductInfo = sequelize.define('product_info', {
 const Review = sequelize.define('review', {
     id: {type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true},
     text: {type: DataTypes.STRING, allowNull: false},
+    userName: {type: DataTypes.STRING, allowNull: false},
+    userId: {type: DataTypes.INTEGER, allowNull: false},
 })
 
 User.hasOne(Basket)
