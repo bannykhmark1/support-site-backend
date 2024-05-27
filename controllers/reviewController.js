@@ -3,18 +3,20 @@ const { Review } = require('../models/models');
 
 // Создание нового отзыва
 exports.createReview = async (req, res) => {
-  try {
-    const { text } = req.body;
-
-    if (!text) {
-      return res.status(400).json({ message: 'Text is required' });
+    try {
+        const { userName, userId, text } = req.body;
+        // Проверьте, что все обязательные поля присутствуют
+        if (!userName || !userId || !text) {
+            return res.status(400).json({ message: "All fields are required" });
+        }
+        const newReview = await Review.create({ userName, userId, text });
+        res.status(201).json(newReview);
+    } catch (error) {
+        res.status(500).json({
+            message: "Failed to create review",
+            error: error.message
+        });
     }
-
-    const newReview = await Review.create({ text });
-    res.status(201).json(newReview);
-  } catch (error) {
-    res.status(500).json({ message: 'Failed to create review', error });
-  }
 };
 
 // Получение всех отзывов

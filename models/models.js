@@ -58,7 +58,7 @@ Basket.hasMany(BasketProduct)
 BasketProduct.belongsTo(Basket)
 
 Type.hasMany(Product)
-Product.belongsTo(Type)
+Product.belongsTo(Type) 
 
 Product.hasMany(Rating)
 Rating.belongsTo(Product)
@@ -71,9 +71,6 @@ ProductInfo.belongsTo(Product)
 
 User.hasMany(Review)
 Review.belongsTo(User)
-
-Product.hasMany(Review)
-Review.belongsTo(Product)
 
 module.exports = {
     User,
