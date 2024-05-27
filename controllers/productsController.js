@@ -1,7 +1,6 @@
-const uuid = require('uuid');
-const path = require('path');
 const { Product, ProductInfo } = require('../models/models');
 const ApiError = require('../error/ApiError');
+const { Op } = require('sequelize');
 
 class ProductsController {
     async create(req, res, next) {
@@ -25,13 +24,13 @@ class ProductsController {
 
             if (info) {
                 info = JSON.parse(info);
-                info.forEach(i =>
-                    ProductInfo.create({
+                for (const i of info) {
+                    await ProductInfo.create({
                         title: i.title,
                         description: i.description,
                         productId: product.id
-                    })
-                );
+                    });
+                }
             }
 
             return res.json(product);
@@ -41,29 +40,55 @@ class ProductsController {
     }
 
     async getAll(req, res) {
-        let { typeId, limit, page } = req.query;
-        page = page || 1;
-        limit = limit || 9;
-        let offset = page * limit - limit;
-        let products;
+        const { typeId, limit = 9, page = 1, minPrice, maxPrice } = req.query;
+        const offset = (page - 1) * limit;
+
+        let where = {};
 
         if (typeId) {
-            products = await Product.findAndCountAll({ where: { typeId }, limit, offset });
-        } else {
-            products = await Product.findAndCountAll({ limit, offset });
+            where.typeId = typeId;
         }
 
-        return res.json(products);
+        if (minPrice) {
+            where.price = { [Op.gte]: parseInt(minPrice) };
+        }
+
+        if (maxPrice) {
+            if (where.price) {
+                where.price[Op.lte] = parseInt(maxPrice);
+            } else {
+                where.price = { [Op.lte]: parseInt(maxPrice) };
+            }
+        }
+
+        try {
+            const products = await Product.findAndCountAll({
+                where,
+                limit,
+                offset
+            });
+            return res.json(products);
+        } catch (error) {
+            return res.status(500).json({ message: 'Ошибка получения продуктов', error });
+        }
     }
 
     async getOne(req, res) {
         const { id } = req.params;
-        const product = await Product.findOne({
-            where: { id },
-            include: [{ model: ProductInfo, as: 'info' }]
-        });
+        try {
+            const product = await Product.findOne({
+                where: { id },
+                include: [{ model: ProductInfo, as: 'info' }]
+            });
 
-        return res.json(product);
+            if (!product) {
+                return res.status(404).json({ message: 'Продукт не найден' });
+            }
+
+            return res.json(product);
+        } catch (error) {
+            return res.status(500).json({ message: 'Ошибка получения продукта', error });
+        }
     }
 }
 
