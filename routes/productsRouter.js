@@ -1,11 +1,15 @@
-const Router = require('express')
-const router = new Router()
-const productsController = require('../controllers/productsController') 
+const Router = require('express'); // Импортируем Express для создания роутера
+const router = new Router(); // Создаём новый роутер
+const productsController = require('../controllers/productsController'); // Импортируем контроллер продуктов
 
-router.post('/', productsController.create)
+// Маршрут для создания продукта
+router.post('/', productsController.create);
 
-router.get('/', productsController.getAll)
+// Маршрут для получения всех продуктов
+router.get('/', productsController.getAll);
 
-router.get('/:id', productsController.getOne)
+// Маршрут для получения одного продукта по ID
+router.get('/:id', productsController.getOne);
 
-module.exports = router
+// Экспортируем роутер для использования в основном файле приложения
+module.exports = router;
