@@ -10,15 +10,14 @@ const router = require('./routes/index');
 const reviewRouter = require('./routes/reviewRouter');
 const productsRouter = require('./routes/productsRouter');
 const nodemailer = require('nodemailer');
+const userRouter = require('./routes/userRouter');
 
 // Использование переменных окружения для настройки Nodemailer
 const transporter = nodemailer.createTransport({
-    host: 'smtp.yandex.ru',
-    port: 465,
-    secure: true, // true for 465, false for other ports
+    service: 'gmail',
     auth: {
-        user: process.env.EMAIL_USER || 'sppgtmailer@yandex.ru',
-        pass: process.env.EMAIL_PASS || 'nlaznurjabuccgeh'
+        user: process.env.EMAIL_USER || 'hooppooh36@gmail.com',
+        pass: process.env.EMAIL_PASS || 'your_application_password'
     }
 });
 
@@ -38,12 +37,12 @@ app.post('/send', async (req, res) => {
     const { name, phone, address, product } = req.body;
 
     const mailOptions = {
-        from: process.env.EMAIL_USER || 'sppgtmailer@yandex.ru',
-        to: 'bannykhmark@yandex.ru',
+        from: process.env.EMAIL_USER || 'hooppooh36@gmail.com',
+        to: 'sppgtmailer@yandex.ru',
         subject: 'Новый заказ',
         text: `Имя: ${name}\nТелефон: ${phone}\nАдрес: ${address}\nПродукт: ${product.name}`
     };
-
+  
     try {
         const info = await transporter.sendMail(mailOptions);
         console.log('Email sent: ' + info.response);
@@ -58,6 +57,7 @@ app.post('/send', async (req, res) => {
 app.use('/api', router);
 app.use('/api/reviews', reviewRouter);
 app.use('/api/products', productsRouter);
+
 
 // Error handling middleware должен быть вызван в самом конце
 app.use(errorHandler);

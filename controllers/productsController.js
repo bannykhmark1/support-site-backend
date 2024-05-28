@@ -78,6 +78,8 @@ class ProductsController {
         }
     }
 
+    
+
     async getOne(req, res, next) {
         const { id } = req.params;
         try {
@@ -95,6 +97,21 @@ class ProductsController {
             next(error);
         }
     }
+
+    async delete(req, res, next) {
+        const { id } = req.params;
+        try {
+            const product = await Product.findByPk(id);
+            if (!product) {
+                return res.status(404).json({ message: 'Продукт не найден' });
+            }
+            await product.destroy();
+            return res.sendStatus(204); // 204 - No Content
+        } catch (error) {
+            next(error);
+        }
+    }
+
 }
 
 module.exports = new ProductsController();

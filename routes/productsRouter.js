@@ -11,5 +11,8 @@ router.get('/', productsController.getAll);
 // Маршрут для получения одного продукта по ID
 router.get('/:id', productsController.getOne);
 
+router.delete('/:id', productsController.delete);
+
+
 // Экспортируем роутер для использования в основном файле приложения
 module.exports = router;
