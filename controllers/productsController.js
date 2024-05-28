@@ -1,6 +1,8 @@
 const { Product, ProductInfo } = require('../models/models');
 const ApiError = require('../error/ApiError');
 const { Op } = require('sequelize');
+const path = require('path');
+const uuid = require('uuid');
 
 class ProductsController {
     async create(req, res, next) {
@@ -14,23 +16,30 @@ class ProductsController {
 
             let fileName = uuid.v4() + path.extname(img.name);
             let uploadPath = path.resolve(__dirname, '..', 'static', fileName);
-            img.mv(uploadPath, err => {
+            await img.mv(uploadPath, err => {
                 if (err) {
                     return next(ApiError.internal('File upload failed'));
                 }
             });
 
-            const product = await Product.create({ name, price, rating, typeId, img: fileName });
+            const product = await Product.create({
+                name, 
+                price, 
+                rating, 
+                typeId, 
+                img: fileName 
+            });
 
             if (info) {
                 info = JSON.parse(info);
-                for (const i of info) {
-                    await ProductInfo.create({
+                const infoPromises = info.map(i => 
+                    ProductInfo.create({
                         title: i.title,
                         description: i.description,
                         productId: product.id
-                    });
-                }
+                    })
+                );
+                await Promise.all(infoPromises);
             }
 
             return res.json(product);
@@ -39,7 +48,7 @@ class ProductsController {
         }
     }
 
-    async getAll(req, res) {
+    async getAll(req, res, next) {
         const { typeId, limit = 9, page = 1, minPrice, maxPrice } = req.query;
         const offset = (page - 1) * limit;
 
@@ -62,18 +71,14 @@ class ProductsController {
         }
 
         try {
-            const products = await Product.findAndCountAll({
-                where,
-                limit,
-                offset
-            });
+            const products = await Product.findAndCountAll({ where, limit, offset });
             return res.json(products);
         } catch (error) {
-            return res.status(500).json({ message: 'Ошибка получения продуктов', error });
+            next(error);
         }
     }
 
-    async getOne(req, res) {
+    async getOne(req, res, next) {
         const { id } = req.params;
         try {
             const product = await Product.findOne({
@@ -87,7 +92,7 @@ class ProductsController {
 
             return res.json(product);
         } catch (error) {
-            return res.status(500).json({ message: 'Ошибка получения продукта', error });
+            next(error);
         }
     }
 }

@@ -1,38 +1,75 @@
 require('dotenv').config();
-   const express = require('express');
-   const sequelize = require('./db');
-   const models = require('./models/models');
-   const cors = require('cors');
-   const fileUpload = require('express-fileupload');
-   const router = require('./routes/index');
-   const path = require('path');
-   const errorHandler = require('./middleware/ErrorHandlingMiddleware');
-   const reviewRouter = require('./routes/reviewRouter');
+const express = require('express');
+const sequelize = require('./db');
+const models = require('./models/models');
+const cors = require('cors');
+const fileUpload = require('express-fileupload');
+const path = require('path');
+const errorHandler = require('./middleware/ErrorHandlingMiddleware');
+const router = require('./routes/index');
+const reviewRouter = require('./routes/reviewRouter');
+const productsRouter = require('./routes/productsRouter');
+const nodemailer = require('nodemailer');
 
-   const PORT = process.env.PORT || 5000;
+// Использование переменных окружения для настройки Nodemailer
+const transporter = nodemailer.createTransport({
+    host: 'smtp.yandex.ru',
+    port: 465,
+    secure: true, // true for 465, false for other ports
+    auth: {
+        user: process.env.EMAIL_USER || 'sppgtmailer@yandex.ru',
+        pass: process.env.EMAIL_PASS || 'nlaznurjabuccgeh'
+    }
+});
 
-   const app = express();
+const PORT = process.env.PORT || 5000;
 
-   app.use(cors());
-   app.use(express.json());
-   app.use(express.static(path.resolve(__dirname, 'static')));
-   app.use(fileUpload({
-       createParentPath: true
-   }));
+const app = express();
 
-   app.use('/api', router);
-   app.use('/api', reviewRouter); // все маршруты отзывов будут доступны по /api/reviews
+app.use(cors());
+app.use(express.json());
+app.use(express.static(path.resolve(__dirname, 'static')));
+app.use(fileUpload({
+  createParentPath: true
+}));
 
-   app.use(errorHandler); // Обработка ошибок, последний Middleware
+// Маршрут для отправки email
+app.post('/send', async (req, res) => {
+    const { name, phone, address, product } = req.body;
 
-   const start = async () => {
-       try {
-           await sequelize.authenticate();
-           await sequelize.sync();
-           app.listen(PORT, () => console.log(`Server started on port ${PORT}`));
-       } catch (e) {
-           console.log(e);
-       }
-   };
+    const mailOptions = {
+        from: process.env.EMAIL_USER || 'sppgtmailer@yandex.ru',
+        to: 'bannykhmark@yandex.ru',
+        subject: 'Новый заказ',
+        text: `Имя: ${name}\nТелефон: ${phone}\nАдрес: ${address}\nПродукт: ${product.name}`
+    };
 
-   start();
+    try {
+        const info = await transporter.sendMail(mailOptions);
+        console.log('Email sent: ' + info.response);
+        res.status(200).json({ message: 'Email sent successfully' });
+    } catch (error) {
+        console.error('Error sending email:', error);
+        res.status(500).json({ message: 'Error sending email', error });
+    }
+});
+
+// Mount routers
+app.use('/api', router);
+app.use('/api/reviews', reviewRouter);
+app.use('/api/products', productsRouter);
+
+// Error handling middleware должен быть вызван в самом конце
+app.use(errorHandler);
+
+const start = async () => {
+  try {
+    await sequelize.authenticate();
+    await sequelize.sync();
+    app.listen(PORT, () => console.log(`Server started on port ${PORT}`));
+  } catch (e) {
+    console.error(e);
+  }
+};
+
+start();
