@@ -9,8 +9,8 @@ class OrdersController {
           const transporter = nodemailer.createTransport({
               service: 'gmail', // Можно использовать другой сервис
               auth: {
-                  user: 'techniquepasha@gmail.com', // Это нужно засунуть в .env
-                  pass: 'enqk ovsg zwbz vuuh' // Это нужно засунуть в .env
+                  user: process.env.NODE_MAILER_USER,
+                  pass: process.env.NODE_MAILER_PASSWORD
               }
           });
       
