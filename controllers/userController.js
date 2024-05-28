@@ -30,6 +30,28 @@ class UserController {
         return res.json({token});
     }
 
+    async deleteUser(req, res, next) {
+        const userId = req.user.id; // Получаем идентификатор текущего пользователя из запроса
+
+        try {
+            // Находим пользователя по его идентификатору
+            const user = await User.findByPk(userId);
+
+            if (!user) {
+                return next(ApiError.notFound('Пользователь не найден'));
+            }
+
+            // Удаляем пользователя из базы данных
+            await user.destroy();
+
+            // Отправляем ответ об успешном удалении пользователя
+            return res.sendStatus(204); // 204 - No Content
+        } catch (error) {
+            // Если произошла ошибка, передаем ее обработчику ошибок Express
+            return next(error);
+        }
+    }
+
     async login(req, res, next) {
         const {email, password} = req.body;
         const user = await User.findOne({where: {email}});
@@ -42,6 +64,20 @@ class UserController {
         }
         const token = generateJwt(user.id, user.email, user.role, user.name);
         return res.json({token});
+    }
+
+    
+    async getAllUsers(req, res, next) {
+        try {
+            // Получаем всех пользователей из базы данных
+            const users = await User.findAll();
+            console.log(users)
+            // Отправляем массив пользователей в качестве ответа
+            return res.json(users);
+        } catch (error) {
+            // Если произошла ошибка, передаем ее обработчику ошибок Express
+            return next(error);
+        }
     }
 
     async check(req, res, next) {

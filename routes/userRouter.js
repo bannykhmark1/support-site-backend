@@ -10,4 +10,8 @@ router.post('/login', userController.login )
 
 router.get('/auth', authMiddleware, userController.check)
 
+router.delete('/deleteuser', authMiddleware, userController.deleteUser);
+
+router.get('/users', authMiddleware, userController.getAllUsers);
+
 module.exports = router
