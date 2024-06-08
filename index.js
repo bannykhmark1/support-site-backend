@@ -1,4 +1,4 @@
-javascript
+
 require('dotenv').config();
 const express = require('express');
 const sequelize = require('./db'); // Убедитесь, что это правильный путь к файлу db.js
