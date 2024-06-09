@@ -42,8 +42,6 @@ const Review = sequelize.define('review', {
 // Определение связей между моделями
 
 // Связь между пользователем и корзиной
-User.hasOne(Basket);
-Basket.belongsTo(User);
 
 // Связь между типом и продуктами
 Type.hasMany(Product);
