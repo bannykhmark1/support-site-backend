@@ -11,13 +11,6 @@ const User = sequelize.define('user', {
     name: { type: DataTypes.STRING, allowNull: false } // Новое поле "name"
 });
 
-const Basket = sequelize.define('basket', {
-    id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true }
-});
-
-const BasketProduct = sequelize.define('basket_product', {
-    id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true }
-});
 
 const Product = sequelize.define('product', {
     id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
@@ -32,10 +25,6 @@ const Type = sequelize.define('type', {
     name: { type: DataTypes.STRING, unique: true, allowNull: false }
 });
 
-const Rating = sequelize.define('rating', {
-    id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
-    rate: { type: DataTypes.INTEGER, allowNull: false }
-});
 
 const ProductInfo = sequelize.define('product_info', {
     id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
@@ -56,25 +45,9 @@ const Review = sequelize.define('review', {
 User.hasOne(Basket);
 Basket.belongsTo(User);
 
-// Связь между пользователем и рейтингом
-User.hasMany(Rating);
-Rating.belongsTo(User);
-
-// Связь между корзиной и продуктами
-Basket.hasMany(BasketProduct);
-BasketProduct.belongsTo(Basket);
-
 // Связь между типом и продуктами
 Type.hasMany(Product);
 Product.belongsTo(Type);
-
-// Связь между продуктом и рейтингом
-Product.hasMany(Rating);
-Rating.belongsTo(Product);
-
-// Связь между продуктом и продуктами в корзине
-Product.hasMany(BasketProduct);
-BasketProduct.belongsTo(Product);
 
 // Связь между продуктом и дополнительной информацией о продукте
 Product.hasMany(ProductInfo, { as: 'info' });
@@ -87,11 +60,9 @@ Review.belongsTo(User);
 // Экспорт моделей для использования в других частях приложения
 module.exports = {
     User,
-    Basket,
     BasketProduct,
     Product,
     Type,
-    Rating,
     ProductInfo,
     Review
 };
