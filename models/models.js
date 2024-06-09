@@ -58,7 +58,6 @@ Review.belongsTo(User);
 // Экспорт моделей для использования в других частях приложения
 module.exports = {
     User,
-    BasketProduct,
     Product,
     Type,
     ProductInfo,
