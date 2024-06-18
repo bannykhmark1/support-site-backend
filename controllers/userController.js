@@ -111,10 +111,29 @@ class UserController {
             from: process.env.EMAIL_USER,
             to: user.email,
             subject: 'Сброс пароля',
-            text: `Вы получили это письмо, потому что вы (или кто-то другой) запросили сброс пароля для вашего аккаунта.\n\n +
-                  Пожалуйста, перейдите по следующей ссылке или вставьте её в адресную строку вашего браузера для завершения процесса:\n\n +
-                    http://45.146.165.154:3000/resetPassword/${token}\n\n +
-                  Если вы не запрашивали сброс пароля, проигнорируйте это письмо, и ваш пароль останется без изменений.\n`
+            html: `
+                <div style="max-width: 600px; margin: 0 auto; font-family: Arial, sans-serif; color: #333; background: #fff8e1; padding: 20px; border: 1px solid #ffcc80; border-radius: 10px;">
+            <header style="text-align: center; padding-bottom: 20px;">
+    
+                <h2 style="color: #ff9800;">Сброс пароля</h2>
+            </header>
+            <section style="background: #fff3e0; padding: 20px; border-radius: 10px; border: 1px solid #ffe0b2;">
+                <p style="font-size: 18px;">Вы получили это письмо, потому что вы (или кто-то другой) запросили сброс пароля для вашего аккаунта.</p>
+                <p style="font-size: 16px;">Пожалуйста, нажмите на кнопку ниже или вставьте её в адресную строку вашего браузера, чтобы изменить ваш пароль:</p>
+                <a href="http://45.146.165.154:3000/resetPassword/${token}" style="display: inline-block; padding: 15px 25px; margin-top: 20px; margin-bottom: 20px; font-size: 18px; background: #ff9800; color: #ffffff; text-decoration: none; border-radius: 5px;">Сбросить пароль</a>
+                <p style="font-size: 14px; color: #888;">Если вы не запрашивали сброс пароля, проигнорируйте это письмо. Ваш пароль останется без изменений.</p>
+            </section>
+            <footer style="text-align: center; padding-top: 20px;">
+                <p style="font-size: 14px; color: #888;">Спасибо,</p>
+                <p style="font-size: 14px; color: #888;">Ваша команда поддержки</p>
+                <div style="margin-top: 20px;">
+                    <a href="https://facebook.com" style="margin: 0 10px;"><img src="https://example.com/facebook-icon.png" alt="Facebook" style="width: 30px;"/></a>
+                    <a href="https://twitter.com" style="margin: 0 10px;"><img src="https://example.com/twitter-icon.png" alt="Twitter" style="width: 30px;"/></a>
+                    <a href="https://instagram.com" style="margin: 0 10px;"><img src="https://example.com/instagram-icon.png" alt="Instagram" style="width: 30px;"/></a>
+                </div>
+            </footer>
+        </div>
+            `
         };
 
         try {
