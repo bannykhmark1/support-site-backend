@@ -1,7 +1,6 @@
 require('dotenv').config();
 const express = require('express');
 const sequelize = require('./db');
-const models = require('./models/models');
 const cors = require('cors');
 const fileUpload = require('express-fileupload');
 const path = require('path');
@@ -9,17 +8,8 @@ const errorHandler = require('./middleware/ErrorHandlingMiddleware');
 const router = require('./routes/index');
 const reviewRouter = require('./routes/reviewRouter');
 const productsRouter = require('./routes/productsRouter');
-const nodemailer = require('nodemailer');
 const userRouter = require('./routes/userRouter');
-
-// Использование переменных окружения для настройки Nodemailer
-const transporter = nodemailer.createTransport({
-    service: 'gmail',
-    auth: {
-        user: process.env.EMAIL_USER || 'hooppooh36@gmail.com',
-        pass: process.env.EMAIL_PASS || 'your_application_password'
-    }
-});
+const nodemailer = require('nodemailer');
 
 const PORT = process.env.PORT || 5000;
 
@@ -28,16 +18,22 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 app.use(express.static(path.resolve(__dirname, 'static')));
-app.use(fileUpload({
-  createParentPath: true
-}));
+app.use(fileUpload({ createParentPath: true }));
 
-// Маршрут для отправки email
+const transporter = nodemailer.createTransport({
+    service: 'yandex',
+    auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASSWORD
+    }
+});
+
+// Маршрут для отправки email (пример)
 app.post('/send', async (req, res) => {
     const { name, phone, address, product } = req.body;
 
     const mailOptions = {
-        from: process.env.EMAIL_USER || 'hooppooh36@gmail.com',
+        from: process.env.EMAIL_USER,
         to: 'sppgtmailer@yandex.ru',
         subject: 'Новый заказ',
         text: `Имя: ${name}\nТелефон: ${phone}\nАдрес: ${address}\nПродукт: ${product.name}`
@@ -57,7 +53,7 @@ app.post('/send', async (req, res) => {
 app.use('/api', router);
 app.use('/api/reviews', reviewRouter);
 app.use('/api/products', productsRouter);
-
+app.use('/api/user', userRouter);
 
 // Error handling middleware должен быть вызван в самом конце
 app.use(errorHandler);
