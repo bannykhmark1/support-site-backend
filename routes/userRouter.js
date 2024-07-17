@@ -2,7 +2,8 @@ const Router = require('express');
 const { body } = require('express-validator');
 const router = new Router();
 const authenticateToken = require('../middleware/authenticateToken');
-const userController = require('../controllers/userController');  // Убедитесь, что путь корректный
+const userController = require('../controllers/userController');
+const checkRole = require('../middleware/checkRoleMiddleware')  // Убедитесь, что путь корректный
 
 // Маршрут для регистрации пользователя
 router.post('/registration', [
@@ -19,6 +20,7 @@ router.post('/login', [
 
 // Маршрут для проверки аутентификации
 router.get('/auth', authenticateToken, userController.check); // Здесь мы защищаем маршрут с нашим middleware
+
 
 // Маршрут для удаления пользователя
 router.delete('/deleteuser', userController.deleteUser);

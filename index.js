@@ -6,10 +6,10 @@ const fileUpload = require('express-fileupload');
 const path = require('path');
 const errorHandler = require('./middleware/ErrorHandlingMiddleware');
 const router = require('./routes/index');
-const reviewRouter = require('./routes/reviewRouter');
-const productsRouter = require('./routes/productsRouter');
 const userRouter = require('./routes/userRouter');
 const nodemailer = require('nodemailer');
+const announcememntController = require('./controllers/announcememntController');
+const announcememntRouter = require('./routes/announcementRouter')
 
 const PORT = process.env.PORT || 5000;
 
@@ -51,9 +51,10 @@ app.post('/send', async (req, res) => {
 
 // Mount routers
 app.use('/api', router);
-app.use('/api/reviews', reviewRouter);
-app.use('/api/products', productsRouter);
+
 app.use('/api/user', userRouter);
+
+app.use('/api/announcements', announcememntRouter);
 
 // Error handling middleware должен быть вызван в самом конце
 app.use(errorHandler);
