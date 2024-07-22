@@ -2,6 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const http = require('http'); // Для WebSocket
 const WebSocket = require('ws'); // Для WebSocket
+const axios = require('axios'); // Для HTTP-запросов
 const sequelize = require('./db');
 const cors = require('cors');
 const fileUpload = require('express-fileupload');
@@ -66,6 +67,50 @@ app.post('/send', async (req, res) => {
     } catch (error) {
         console.error('Error sending email:', error);
         res.status(500).json({ message: 'Error sending email', error });
+    }
+});
+
+// Маршрут для начала авторизации через Яндекс
+app.get('/auth/yandex', (req, res) => {
+    const redirectUri = encodeURIComponent('https://support.hobbs-it.ru/auth/yandex/callback');
+    const yandexAuthUrl = `https://oauth.yandex.ru/authorize?response_type=code&client_id=${process.env.YANDEX_CLIENT_ID}&redirect_uri=${redirectUri}`;
+    res.redirect(yandexAuthUrl);
+});
+
+// Маршрут для обработки обратного вызова от Яндекс
+app.get('/auth/yandex/callback', async (req, res) => {
+    const code = req.query.code;
+    try {
+        const tokenResponse = await axios.post('https://oauth.yandex.ru/token', null, {
+            params: {
+                grant_type: 'authorization_code',
+                code: code,
+                client_id: process.env.YANDEX_CLIENT_ID,
+                client_secret: process.env.YANДEX_CLIENT_SECRET,
+                redirect_uri: 'https://support.hobbs-it.ru/auth/yandex/callback'
+            }
+        });
+
+        const accessToken = tokenResponse.data.access_token;
+        const userInfoResponse = await axios.get('https://login.yandex.ru/info', {
+            headers: {
+                Authorization: `OAuth ${accessToken}`
+            }
+        });
+
+        const userEmail = userInfoResponse.data.default_email;
+        const userDomain = userEmail.split('@')[1];
+
+        if (userDomain === 'kurganmk' || userDomain === 'hobbs-it') {
+            // Перенаправление на клиентскую часть с данными пользователя
+            res.redirect(`https://support.hobbs-it.ru/profile?data=${encodeURIComponent(JSON.stringify(userInfoResponse.data))}`);
+        } else {
+            // Перенаправление на другой URL
+            res.redirect('https://support.hobbs-it.ru/');
+        }
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Ошибка авторизации');
     }
 });
 
