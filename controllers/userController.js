@@ -82,7 +82,7 @@ class UserController {
 
     async check(req, res, next) {
         try {
-            console.log("Проверка пользователя", req.user);  // Добавьте вывод значений для отладки
+            //console.log("Проверка пользователя", req.user);  // Добавьте вывод значений для отладки
             const token = generateJwt(req.user.id, req.user.email, req.user.role, req.user.name);
             return res.json({ token });
         } catch (e) {
@@ -92,12 +92,12 @@ class UserController {
 
     async requestPasswordReset(req, res, next) {
         const { email } = req.body;
-        console.log(`Запрос сброса пароля для email: ${email}`);
+        //console.log(`Запрос сброса пароля для email: ${email}`);
 
         const user = await User.findOne({ where: { email } });
 
         if (!user) {
-            console.log('Пользователь не найден');
+            //console.log('Пользователь не найден');
             return next(ApiError.badRequest('Пользователь с таким email не найден'));
         }
 
@@ -138,7 +138,7 @@ class UserController {
 
         try {
             await transporter.sendMail(mailOptions);
-            console.log('Письмо отправлено');
+            //console.log('Письмо отправлено');
             res.status(200).json({ message: 'Email для сброса пароля отправлен' });
         } catch (error) {
             console.error('Ошибка отправки email:', error);
@@ -149,11 +149,11 @@ class UserController {
     async resetPassword(req, res, next) {
         const { token, newPassword } = req.body;
 
-        console.log(`Получен запрос на сброс пароля с токеном: ${token}, новый пароль: ${newPassword}`);
+        //console.log(`Получен запрос на сброс пароля с токеном: ${token}, новый пароль: ${newPassword}`);
         
         try {
             if (!token || !newPassword) {
-                console.log(`Неккоректные данные: токен - ${token}, новый пароль - ${newPassword}`);
+                //console.log(`Неккоректные данные: токен - ${token}, новый пароль - ${newPassword}`);
                 return next(ApiError.badRequest('Токен и пароль обязательны'));
             }
 
@@ -161,21 +161,21 @@ class UserController {
             try {
                 decoded = jwt.verify(token, process.env.SECRET_KEY);
             } catch (err) {
-                console.log('Токен недействителен или истек');
+                //console.log('Токен недействителен или истек');
                 return next(ApiError.badRequest('Токен сброса пароля недействителен или истек'));
             }
 
             const user = await User.findOne({ where: { id: decoded.id, email: decoded.email } });
 
             if (!user) {
-                console.log('Пользователь не найден');
+                //console.log('Пользователь не найден');
                 return next(ApiError.badRequest('Пользователь не найден'));
             }
 
             user.password = await bcrypt.hash(newPassword, 5);
 
             await user.save();
-            console.log('Пароль обновлен');
+            //console.log('Пароль обновлен');
             res.status(200).json({ message: 'Пароль успешно изменен' });
         } catch (error) {
             console.error(`Ошибка сервера при сбросе пароля: ${error.message}`);
