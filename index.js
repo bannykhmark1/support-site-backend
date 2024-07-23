@@ -76,13 +76,13 @@ app.get('/auth/yandex/callback', async (req, res) => {
 
     if (userDomain === 'kurganmk' || userDomain === 'hobbs-it') {
       req.session.user = userInfoResponse.data;
-      res.redirect(`https://support.hobbs-it.ru/profile?data=${encodeURIComponent(JSON.stringify(userInfoResponse.data))}`);
+      res.json({ user: userInfoResponse.data });
     } else {
-      res.redirect('https://support.hobbs-it.ru/');
+      res.status(403).json({ message: 'Unauthorized domain' });
     }
   } catch (error) {
     console.error(error);
-    res.status(500).send('Ошибка авторизации');
+    res.status(500).json({ message: 'Ошибка авторизации' });
   }
 });
 
