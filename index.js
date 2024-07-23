@@ -1,39 +1,47 @@
 require('dotenv').config();
 const express = require('express');
-const http = require('http'); // Для WebSocket
-const WebSocket = require('ws'); // Для WebSocket
-const axios = require('axios'); // Для HTTP-запросов
+const http = require('http');
+const WebSocket = require('ws');
+const axios = require('axios');
 const sequelize = require('./db');
 const cors = require('cors');
 const fileUpload = require('express-fileupload');
 const path = require('path');
+const session = require('express-session'); // Добавлено для управления сессиями
 const errorHandler = require('./middleware/ErrorHandlingMiddleware');
 const router = require('./routes/index');
 const userRouter = require('./routes/userRouter');
+const announcementRouter = require('./routes/announcementRouter');
 const nodemailer = require('nodemailer');
-const announcememntRouter = require('./routes/announcementRouter');
 
 const PORT = process.env.PORT || 5000;
 
 const app = express();
-const server = http.createServer(app); // Создаем сервер HTTP
-const wss = new WebSocket.Server({ server }); // Создаем WebSocket сервер
+const server = http.createServer(app);
+const wss = new WebSocket.Server({ server });
 
-// WebSocket обработчики
+// Настройка сессий
+app.use(session({
+  secret: process.env.SESSION_SECRET || 'your_secret_key',
+  resave: false,
+  saveUninitialized: true,
+  cookie: { secure: process.env.NODE_ENV === 'production' }
+}));
+
+// Обработчики WebSocket
 wss.on('connection', (ws) => {
-    console.log('New WebSocket connection');
+    console.log('Новое соединение WebSocket');
 
     ws.on('message', (message) => {
-        console.log('received: %s', message);
-        // Пример ответа на сообщение
-        ws.send(`Received your message: ${message}`);
+        console.log('получено: %s', message);
+        ws.send(`Ваше сообщение получено: ${message}`);
     });
 
     ws.on('close', () => {
-        console.log('WebSocket connection closed');
+        console.log('Соединение WebSocket закрыто');
     });
 
-    ws.send('Welcome to the WebSocket server');
+    ws.send('Добро пожаловать на сервер WebSocket');
 });
 
 app.use(cors());
@@ -66,12 +74,9 @@ app.get('/auth/yandex/callback', async (req, res) => {
     const userDomain = userEmail.split('@')[1];
 
     if (userDomain === 'kurganmk' || userDomain === 'hobbs-it') {
-      // Сохранение данных пользователя в сессии
       req.session.user = userInfoResponse.data;
-      // Перенаправление на клиентскую часть с данными пользователя
-      res.redirect(`https://support.hobbs-it.ru?data=${encodeURIComponent(JSON.stringify(userInfoResponse.data))}`);
+      res.redirect(`https://support.hobbs-it.ru/profile?data=${encodeURIComponent(JSON.stringify(userInfoResponse.data))}`);
     } else {
-      // Перенаправление на другой URL
       res.redirect('https://support.hobbs-it.ru/');
     }
   } catch (error) {
@@ -80,49 +85,10 @@ app.get('/auth/yandex/callback', async (req, res) => {
   }
 });
 
-// Маршрут для обработки обратного вызова от Яндекс
-app.get('/auth/yandex/callback', async (req, res) => {
-    const code = req.query.code;
-    try {
-        const tokenResponse = await axios.post('https://oauth.yandex.ru/token', null, {
-            params: {
-                grant_type: 'authorization_code',
-                code: code,
-                client_id: process.env.YANDEX_CLIENT_ID,
-                client_secret: process.env.YANDEX_CLIENT_SECRET,
-                redirect_uri: 'https://support.hobbs-it.ru/auth/yandex/callback'
-            }
-        });
-
-        const accessToken = tokenResponse.data.access_token;
-        const userInfoResponse = await axios.get('https://login.yandex.ru/info', {
-            headers: {
-                Authorization: `OAuth ${accessToken}`
-            }
-        });
-
-        const userEmail = userInfoResponse.data.default_email;
-        const userDomain = userEmail.split('@')[1];
-
-        if (userDomain === 'kurganmk' || userDomain === 'hobbs-it') {
-            // Сохранение данных пользователя в сессии
-            req.session.user = userInfoResponse.data;
-            // Перенаправление на клиентскую часть с данными пользователя
-            res.redirect(`https://support.hobbs-it.ru/profile?data=${encodeURIComponent(JSON.stringify(userInfoResponse.data))}`);
-        } else {
-            // Перенаправление на другой URL
-            res.redirect('https://support.hobbs-it.ru/');
-        }
-    } catch (error) {
-        console.error(error);
-        res.status(500).send('Ошибка авторизации');
-    }
-});
-
 // Маршруты API
 app.use('/api', router);
 app.use('/api/user', userRouter);
-app.use('/api/announcements', announcememntRouter);
+app.use('/api/announcements', announcementRouter);
 
 // Обработка ошибок
 app.use(errorHandler);
@@ -131,7 +97,7 @@ const start = async () => {
     try {
         await sequelize.authenticate();
         await sequelize.sync();
-        server.listen(PORT, () => console.log(`Server started on port ${PORT}`));
+        server.listen(PORT, () => console.log(`Сервер запущен на порту ${PORT}`));
     } catch (e) {
         console.error(e);
     }
