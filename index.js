@@ -12,8 +12,7 @@ const errorHandler = require('./middleware/ErrorHandlingMiddleware');
 const router = require('./routes/index');
 const userRouter = require('./routes/userRouter');
 const announcementRouter = require('./routes/announcementRouter');
-const authYandexMiddleware = require('./middleware/authYandexMiddleware'); // Импортируем middleware
-const nodemailer = require('nodemailer');
+const authYandexMiddleware = require('./middleware/authYandexMiddleware');
 const authMiddleware = require('./middleware/authMiddleware');
 
 const PORT = process.env.PORT || 5000;
@@ -29,7 +28,6 @@ app.use(session({
   saveUninitialized: true,
   cookie: { secure: process.env.NODE_ENV === 'production' }
 }));
-
 
 app.use(cors());
 app.use(express.json());
@@ -71,7 +69,6 @@ app.get('/auth/yandex/callback', async (req, res) => {
     res.status(500).json({ message: 'Ошибка авторизации' });
   }
 });
-
 
 // Применение middleware для защищенных маршрутов
 app.use('/api/user', authMiddleware, userRouter);
