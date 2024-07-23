@@ -14,6 +14,7 @@ const userRouter = require('./routes/userRouter');
 const announcementRouter = require('./routes/announcementRouter');
 const authYandexMiddleware = require('./middleware/authYandexMiddleware'); // Импортируем middleware
 const nodemailer = require('nodemailer');
+const authMiddleware = require('./middleware/authMiddleware');
 
 const PORT = process.env.PORT || 5000;
 
@@ -29,21 +30,6 @@ app.use(session({
   cookie: { secure: process.env.NODE_ENV === 'production' }
 }));
 
-// Обработчики WebSocket
-wss.on('connection', (ws) => {
-    console.log('Новое соединение WebSocket');
-
-    ws.on('message', (message) => {
-        console.log('получено: %s', message);
-        ws.send(`Ваше сообщение получено: ${message}`);
-    });
-
-    ws.on('close', () => {
-        console.log('Соединение WebSocket закрыто');
-    });
-
-    ws.send('Добро пожаловать на сервер WebSocket');
-});
 
 app.use(cors());
 app.use(express.json());
@@ -86,8 +72,9 @@ app.get('/auth/yandex/callback', async (req, res) => {
   }
 });
 
+
 // Применение middleware для защищенных маршрутов
-app.use('/api/user', authYandexMiddleware, userRouter);
+app.use('/api/user', authMiddleware, userRouter);
 app.use('/api/announcements', authYandexMiddleware, announcementRouter);
 
 // Маршруты API
