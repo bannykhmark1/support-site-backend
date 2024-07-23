@@ -7,11 +7,12 @@ const sequelize = require('./db');
 const cors = require('cors');
 const fileUpload = require('express-fileupload');
 const path = require('path');
-const session = require('express-session'); // Добавлено для управления сессиями
+const session = require('express-session');
 const errorHandler = require('./middleware/ErrorHandlingMiddleware');
 const router = require('./routes/index');
 const userRouter = require('./routes/userRouter');
 const announcementRouter = require('./routes/announcementRouter');
+const authYandexMiddleware = require('./middleware/authYandexMiddleware'); // Импортируем middleware
 const nodemailer = require('nodemailer');
 
 const PORT = process.env.PORT || 5000;
@@ -85,10 +86,12 @@ app.get('/auth/yandex/callback', async (req, res) => {
   }
 });
 
+// Применение middleware для защищенных маршрутов
+app.use('/api/user', authYandexMiddleware, userRouter);
+app.use('/api/announcements', authYandexMiddleware, announcementRouter);
+
 // Маршруты API
 app.use('/api', router);
-app.use('/api/user', userRouter);
-app.use('/api/announcements', announcementRouter);
 
 // Обработка ошибок
 app.use(errorHandler);
