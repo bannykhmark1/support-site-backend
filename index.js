@@ -1,7 +1,5 @@
 require('dotenv').config();
 const express = require('express');
-const http = require('http'); // Для WebSocket
-const WebSocket = require('ws'); // Для WebSocket
 const axios = require('axios'); // Для HTTP-запросов
 const sequelize = require('./db');
 const cors = require('cors');
@@ -15,25 +13,6 @@ const announcementRouter = require('./routes/announcementRouter');
 const PORT = process.env.PORT || 5000;
 
 const app = express();
-const server = http.createServer(app); // Создаем сервер HTTP
-const wss = new WebSocket.Server({ server }); // Создаем WebSocket сервер
-
-// WebSocket обработчики
-wss.on('connection', (ws) => {
-    console.log('New WebSocket connection');
-
-    ws.on('message', (message) => {
-        console.log('received: %s', message);
-        // Пример ответа на сообщение
-        ws.send(`Received your message: ${message}`);
-    });
-
-    ws.on('close', () => {
-        console.log('WebSocket connection closed');
-    });
-
-    ws.send('Welcome to the WebSocket server');
-});
 
 app.use(cors());
 app.use(express.json());
@@ -88,7 +67,7 @@ app.get('/auth/yandex/callback', async (req, res) => {
                 grant_type: 'authorization_code',
                 code: code,
                 client_id: process.env.YANDEX_CLIENT_ID,
-                client_secret: process.env.YANDEX_CLIENT_SECRET,
+                client_secret: process.env.YANДекс_CLIENT_SECRET,
                 redirect_uri: 'https://support.hobbs-it.ru/auth/yandex/callback'
             }
         });
@@ -130,7 +109,7 @@ const start = async () => {
     try {
         await sequelize.authenticate();
         await sequelize.sync();
-        server.listen(PORT, () => console.log(`Server started on port ${PORT}`));
+        app.listen(PORT, () => console.log(`Server started on port ${PORT}`));
     } catch (e) {
         console.error(e);
     }
