@@ -5,6 +5,7 @@ const sequelize = require('./db');
 const cors = require('cors');
 const fileUpload = require('express-fileupload');
 const path = require('path');
+const session = require('express-session'); // Для работы с сессиями
 const errorHandler = require('./middleware/ErrorHandlingMiddleware');
 const router = require('./routes/index');
 const userRouter = require('./routes/userRouter');
@@ -13,6 +14,14 @@ const announcementRouter = require('./routes/announcementRouter');
 const PORT = process.env.PORT || 5000;
 
 const app = express();
+
+// Настройка сессий
+app.use(session({
+  secret: process.env.SESSION_SECRET || 'your-secret-key', // Убедитесь, что SESSION_SECRET установлен в переменных окружения
+  resave: false,
+  saveUninitialized: true,
+  cookie: { secure: false } // Для разработки используйте secure: false, для продакшн среды установите true
+}));
 
 app.use(cors());
 app.use(express.json());
@@ -56,45 +65,6 @@ app.get('/auth/yandex/callback', async (req, res) => {
     console.error(error);
     res.status(500).send('Ошибка авторизации');
   }
-});
-
-// Маршрут для обработки обратного вызова от Яндекс
-app.get('/auth/yandex/callback', async (req, res) => {
-    const code = req.query.code;
-    try {
-        const tokenResponse = await axios.post('https://oauth.yandex.ru/token', null, {
-            params: {
-                grant_type: 'authorization_code',
-                code: code,
-                client_id: process.env.YANDEX_CLIENT_ID,
-                client_secret: process.env.YANДекс_CLIENT_SECRET,
-                redirect_uri: 'https://support.hobbs-it.ru/auth/yandex/callback'
-            }
-        });
-
-        const accessToken = tokenResponse.data.access_token;
-        const userInfoResponse = await axios.get('https://login.yandex.ru/info', {
-            headers: {
-                Authorization: `OAuth ${accessToken}`
-            }
-        });
-
-        const userEmail = userInfoResponse.data.default_email;
-        const userDomain = userEmail.split('@')[1];
-
-        if (userDomain === 'kurganmk' || userDomain === 'hobbs-it') {
-            // Сохранение данных пользователя в сессии
-            req.session.user = userInfoResponse.data;
-            // Перенаправление на клиентскую часть с данными пользователя
-            res.redirect(`https://support.hobbs-it.ru/profile?data=${encodeURIComponent(JSON.stringify(userInfoResponse.data))}`);
-        } else {
-            // Перенаправление на другой URL
-            res.redirect('https://support.hobbs-it.ru/');
-        }
-    } catch (error) {
-        console.error(error);
-        res.status(500).send('Ошибка авторизации');
-    }
 });
 
 // Маршруты API
