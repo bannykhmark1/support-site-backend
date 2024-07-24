@@ -53,16 +53,13 @@ app.get('/auth/yandex/callback', async (req, res) => {
     const userDomain = userEmail.split('@')[1];
 
     if (userDomain === 'kurganmk' || userDomain === 'hobbs-it') {
-      // Сохранение данных пользователя в сессии
       req.session.user = userInfoResponse.data;
-      // Перенаправление на клиентскую часть с данными пользователя
       res.redirect(`https://support.hobbs-it.ru?data=${encodeURIComponent(JSON.stringify(userInfoResponse.data))}`);
     } else {
-      // Перенаправление на другой URL
       res.redirect('https://support.hobbs-it.ru/');
     }
   } catch (error) {
-    console.error(error);
+    console.error('Ошибка авторизации:', error);
     res.status(500).send('Ошибка авторизации');
   }
 });
