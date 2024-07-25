@@ -29,7 +29,7 @@ app.use(express.static(path.resolve(__dirname, 'static')));
 app.use(fileUpload({ createParentPath: true }));
 
 // Маршрут для начала авторизации через Яндекс
-app.get('/auth/yandex/callback', async (req, res) => {
+app.get('/', async (req, res) => {
   const code = req.query.code;
   try {
     const tokenResponse = await axios.post('https://oauth.yandex.ru/token', null, {
