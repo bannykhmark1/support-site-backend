@@ -31,8 +31,10 @@ app.use(fileUpload({ createParentPath: true }));
 // Маршрут для начала авторизации через Яндекс
 app.get('/', async (req, res) => {
   const code = req.query.code;
-  console.log(code)
+  console.log('Получен код авторизации:', code); // Логируем полученный код
+
   try {
+    console.log('Отправка запроса на получение токена...');
     const tokenResponse = await axios.post('https://oauth.yandex.ru/token', null, {
       params: {
         grant_type: 'authorization_code',
@@ -42,17 +44,21 @@ app.get('/', async (req, res) => {
         redirect_uri: 'https://support.hobbs-it.ru/'
       }
     });
+    console.log('Токен получен:', tokenResponse.data); // Логируем ответ с токеном
 
     const accessToken = tokenResponse.data.access_token;
+    console.log('Отправка запроса на получение информации о пользователе...');
     const userInfoResponse = await axios.get('https://login.yandex.ru/info', {
       headers: {
         Authorization: `OAuth ${accessToken}`
       }
     });
+    console.log('Информация о пользователе получена:', userInfoResponse.data); // Логируем информацию о пользователе
 
     const userEmail = userInfoResponse.data.default_email;
     const userDomain = userEmail.split('@')[1];
 
+    console.log('Проверка домена:', userDomain); // Логируем домен пользователя
     if (userDomain === 'kurganmk' || userDomain === 'hobbs-it') {
       req.session.user = userInfoResponse.data;
       res.redirect(`https://support.hobbs-it.ru?data=${encodeURIComponent(JSON.stringify(userInfoResponse.data))}`);
@@ -60,10 +66,11 @@ app.get('/', async (req, res) => {
       res.redirect('https://support.hobbs-it.ru/');
     }
   } catch (error) {
-    console.error('Ошибка авторизации:', error);
+    console.error('Ошибка авторизации:', error); // Логируем ошибку
     res.status(500).send('Ошибка авторизации');
   }
 });
+
 
 // Маршруты API
 app.use('/api', router);
