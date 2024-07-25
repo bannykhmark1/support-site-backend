@@ -30,7 +30,7 @@ app.use(session({
 passport.use(new YandexStrategy({
   clientID: process.env.YANDEX_CLIENT_ID,
   clientSecret: process.env.YANDEX_CLIENT_SECRET,
-  callbackURL: 'https://support.hobbs-it.ru/'
+  callbackURL: 'https://support.hobbs-it.ruapi/auth/yandex/callback'
 }, async (accessToken, refreshToken, profile, done) => {
   try {
     let user = await User.findOne({ where: { yandexId: profile.id } });
@@ -69,10 +69,10 @@ app.use(express.static(path.resolve(__dirname, 'static')));
 app.use(fileUpload({ createParentPath: true }));
 
 // Маршрут для начала авторизации через Яндекс
-app.get('/auth/yandex/login', passport.authenticate('yandex'));
+app.get('api/auth/yandex/login', passport.authenticate('yandex'));
 
 // Маршрут для обработки обратного вызова от Яндекса
-app.get('/auth/yandex/callback', 
+app.get('api/auth/yandex/callback', 
   passport.authenticate('yandex', { failureRedirect: '/' }),
   (req, res) => {
     res.redirect('/'); // Перенаправление после успешной аутентификации
@@ -80,13 +80,13 @@ app.get('/auth/yandex/callback',
 );
 
 // Маршрут для выхода из системы
-app.get('/auth/yandex/logout', (req, res) => {
+app.get('api/auth/yandex/logout', (req, res) => {
   req.logout();
   res.redirect('/');
 });
 
 // Маршрут для получения данных текущего пользователя через Яндекс
-app.get('/auth/yandex/user', (req, res) => {
+app.get('api/auth/yandex/user', (req, res) => {
   res.send(req.user);
 });
 
@@ -98,7 +98,7 @@ async function getYandexToken(code) {
       code: code,
       client_id: process.env.YANDEX_CLIENT_ID,
       client_secret: process.env.YANDEX_CLIENT_SECRET,
-      redirect_uri: 'https://support.hobbs-it.ru/' // Убедитесь, что это правильный URL редиректа
+      redirect_uri: 'https://support.hobbs-it.ru/auth/yandex/callback' // Убедитесь, что это правильный URL редиректа
     }), {
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded'
