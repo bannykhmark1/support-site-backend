@@ -39,7 +39,7 @@ app.get('/', async (req, res) => {
           grant_type: 'authorization_code',
           code: code,
           client_id: process.env.YANDEX_CLIENT_ID,
-          client_secret: process.env.YANDEX_CLIENT_SECRET,
+          client_secret: process.env.YANДЕКС_CLIENT_SECRET,
           redirect_uri: 'https://support.hobbs-it.ru/' // Убедитесь, что этот URL совпадает с тем, который вы зарегистрировали в настройках Яндекс OAuth
         }
       });
@@ -56,6 +56,7 @@ app.get('/', async (req, res) => {
 
       if (userDomain === 'kurganmk' || userDomain === 'hobbs-it') {
         req.session.user = userInfoResponse.data;
+        console.log('User session data:', req.session.user);
         res.redirect(`https://support.hobbs-it.ru?data=${encodeURIComponent(JSON.stringify(userInfoResponse.data))}`);
       } else {
         res.redirect('https://support.hobbs-it.ru/');
