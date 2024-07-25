@@ -38,7 +38,7 @@ app.get('/auth/yandex/callback', async (req, res) => {
         code: code,
         client_id: process.env.YANDEX_CLIENT_ID,
         client_secret: process.env.YANDEX_CLIENT_SECRET,
-        redirect_uri: 'https://support.hobbs-it.ru/auth/yandex/callback'
+        redirect_uri: 'https://support.hobbs-it.ru/'
       }
     });
 
