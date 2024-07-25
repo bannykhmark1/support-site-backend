@@ -98,7 +98,7 @@ async function getYandexToken(code) {
       code: code,
       client_id: process.env.YANDEX_CLIENT_ID,
       client_secret: process.env.YANDEX_CLIENT_SECRET,
-      redirect_uri: 'https://support.hobbs-it.ru/auth/yandex/callback' // Убедитесь, что это правильный URL редиректа
+      redirect_uri: 'https://support.hobbs-it.ru/' // Убедитесь, что это правильный URL редиректа
     }), {
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded'
