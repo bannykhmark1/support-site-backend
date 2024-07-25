@@ -28,29 +28,42 @@ app.use(express.json());
 app.use(express.static(path.resolve(__dirname, 'static')));
 app.use(fileUpload({ createParentPath: true }));
 
+// Функция для получения токена доступа Яндекс
+async function getYandexToken(code) {
+  try {
+    const response = await axios.post('https://oauth.yandex.ru/token', new URLSearchParams({
+      grant_type: 'authorization_code',
+      code: code,
+      client_id: process.env.YANDEX_CLIENT_ID,
+      client_secret: process.env.YANDEX_CLIENT_SECRET,
+      redirect_uri: 'https://support.hobbs-it.ru/' // Убедитесь, что это правильный URL редиректа
+    }), {
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded'
+      }
+    });
+
+    console.log('Access Token:', response.data.access_token);
+    return response.data.access_token;
+  } catch (error) {
+    console.error('Ошибка авторизации:', error);
+    throw error;
+  }
+}
+
 // Маршрут для начала авторизации через Яндекс
 app.post('/api/auth/yandex', async (req, res) => {
   const { code } = req.body;
 
   try {
-    const tokenResponse = await axios.post('https://oauth.yandex.ru/token', null, {
-      params: {
-        grant_type: 'authorization_code',
-        code: code,
-        client_id: process.env.YANDEX_CLIENT_ID,
-        client_secret: process.env.YANDEX_CLIENT_SECRET,
-        redirect_uri: 'https://support.hobbs-it.ru/'
-      }
-    });
-
-    const accessToken = tokenResponse.data.access_token;
+    const accessToken = await getYandexToken(code);
     const userInfoResponse = await axios.get('https://login.yandex.ru/info', {
       headers: {
         Authorization: `OAuth ${accessToken}`
       }
     });
 
-    // Вы можете сохранить данные пользователя или токен в сессии
+    // Сохранение данных пользователя или токена в сессии
     req.session.user = userInfoResponse.data;
     res.json(userInfoResponse.data);
   } catch (error) {
@@ -58,8 +71,6 @@ app.post('/api/auth/yandex', async (req, res) => {
     res.status(500).send('Ошибка авторизации');
   }
 });
-
-
 
 // Маршруты API
 app.use('/api', router);
@@ -70,13 +81,13 @@ app.use('/api/announcements', announcementRouter);
 app.use(errorHandler);
 
 const start = async () => {
-    try {
-        await sequelize.authenticate();
-        await sequelize.sync();
-        app.listen(PORT, () => console.log(`Server started on port ${PORT}`));
-    } catch (e) {
-        console.error(e);
-    }
+  try {
+    await sequelize.authenticate();
+    await sequelize.sync();
+    app.listen(PORT, () => console.log(`Server started on port ${PORT}`));
+  } catch (e) {
+    console.error(e);
+  }
 };
 
 start();
