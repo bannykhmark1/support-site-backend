@@ -1,49 +1,27 @@
 require('dotenv').config();
 const express = require('express');
-const http = require('http');
-const WebSocket = require('ws');
-const axios = require('axios');
+const axios = require('axios'); // Для HTTP-запросов
 const sequelize = require('./db');
 const cors = require('cors');
 const fileUpload = require('express-fileupload');
 const path = require('path');
-const session = require('express-session');
+const session = require('express-session'); // Для работы с сессиями
 const errorHandler = require('./middleware/ErrorHandlingMiddleware');
 const router = require('./routes/index');
 const userRouter = require('./routes/userRouter');
 const announcementRouter = require('./routes/announcementRouter');
-const authYandexMiddleware = require('./middleware/authYandexMiddleware'); // Импортируем middleware
-const nodemailer = require('nodemailer');
 
 const PORT = process.env.PORT || 5000;
 
 const app = express();
-const server = http.createServer(app);
-const wss = new WebSocket.Server({ server });
 
 // Настройка сессий
 app.use(session({
-  secret: process.env.SESSION_SECRET || 'your_secret_key',
+  secret: process.env.SESSION_SECRET || 'your-secret-key', // Убедитесь, что SESSION_SECRET установлен в переменных окружения
   resave: false,
   saveUninitialized: true,
-  cookie: { secure: process.env.NODE_ENV === 'production' }
+  cookie: { secure: false } // Для разработки используйте secure: false, для продакшн среды установите true
 }));
-
-// Обработчики WebSocket
-wss.on('connection', (ws) => {
-    console.log('Новое соединение WebSocket');
-
-    ws.on('message', (message) => {
-        console.log('получено: %s', message);
-        ws.send(`Ваше сообщение получено: ${message}`);
-    });
-
-    ws.on('close', () => {
-        console.log('Соединение WebSocket закрыто');
-    });
-
-    ws.send('Добро пожаловать на сервер WebSocket');
-});
 
 app.use(cors());
 app.use(express.json());
@@ -76,22 +54,20 @@ app.get('/auth/yandex/callback', async (req, res) => {
 
     if (userDomain === 'kurganmk' || userDomain === 'hobbs-it') {
       req.session.user = userInfoResponse.data;
-      res.redirect(`https://support.hobbs-it.ru/profile?data=${encodeURIComponent(JSON.stringify(userInfoResponse.data))}`);
+      res.redirect(`https://support.hobbs-it.ru?data=${encodeURIComponent(JSON.stringify(userInfoResponse.data))}`);
     } else {
       res.redirect('https://support.hobbs-it.ru/');
     }
   } catch (error) {
-    console.error(error);
+    console.error('Ошибка авторизации:', error);
     res.status(500).send('Ошибка авторизации');
   }
 });
 
-// Применение middleware для защищенных маршрутов
-app.use('/api/user', authYandexMiddleware, userRouter);
-app.use('/api/announcements', authYandexMiddleware, announcementRouter);
-
 // Маршруты API
 app.use('/api', router);
+app.use('/api/user', userRouter);
+app.use('/api/announcements', announcementRouter);
 
 // Обработка ошибок
 app.use(errorHandler);
@@ -100,7 +76,7 @@ const start = async () => {
     try {
         await sequelize.authenticate();
         await sequelize.sync();
-        server.listen(PORT, () => console.log(`Сервер запущен на порту ${PORT}`));
+        app.listen(PORT, () => console.log(`Server started on port ${PORT}`));
     } catch (e) {
         console.error(e);
     }
