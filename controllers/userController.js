@@ -82,7 +82,6 @@ class UserController {
 
     async check(req, res, next) {
         try {
-            //console.log("Проверка пользователя", req.user);  // Добавьте вывод значений для отладки
             const token = generateJwt(req.user.id, req.user.email, req.user.role, req.user.name);
             return res.json({ token });
         } catch (e) {
