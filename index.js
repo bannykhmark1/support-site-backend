@@ -28,46 +28,15 @@ app.use(express.json());
 app.use(express.static(path.resolve(__dirname, 'static')));
 app.use(fileUpload({ createParentPath: true }));
 
-// Маршрут для начала авторизации через Яндекс
-app.get('/auth/yandex/callback', async (req, res) => {
-  const code = req.query.code;
-  try {
-    const tokenResponse = await axios.post('https://oauth.yandex.ru/token', null, {
-      params: {
-        grant_type: 'authorization_code',
-        code: code,
-        client_id: process.env.YANDEX_CLIENT_ID,
-        client_secret: process.env.YANDEX_CLIENT_SECRET,
-        redirect_uri: 'https://support.hobbs-it.ru/auth/yandex/callback'
-      }
-    });
-
-    const accessToken = tokenResponse.data.access_token;
-    const userInfoResponse = await axios.get('https://login.yandex.ru/info', {
-      headers: {
-        Authorization: `OAuth ${accessToken}`
-      }
-    });
-
-    const userEmail = userInfoResponse.data.default_email;
-    const userDomain = userEmail.split('@')[1];
-
-    if (userDomain === 'kurganmk' || userDomain === 'hobbs-it') {
-      req.session.user = userInfoResponse.data;
-      res.redirect(`https://support.hobbs-it.ru?data=${encodeURIComponent(JSON.stringify(userInfoResponse.data))}`);
-    } else {
-      res.redirect('https://support.hobbs-it.ru/');
-    }
-  } catch (error) {
-    console.error('Ошибка авторизации:', error);
-    res.status(500).send('Ошибка авторизации');
-  }
-});
-
 // Маршруты API
 app.use('/api', router);
 app.use('/api/user', userRouter);
 app.use('/api/announcements', announcementRouter);
+
+const userYandexRouter = require('./routes/userYandexRouter');
+
+app.use('/api/userYandex', userYandexRouter);
+
 
 // Обработка ошибок
 app.use(errorHandler);

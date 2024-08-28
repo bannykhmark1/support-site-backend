@@ -18,9 +18,17 @@ const Announcement = sequelize.define('announcement', {
     date: { type: DataTypes.DATE, allowNull: false }
 });
 
+// Новая модель для пользователей, входящих через Яндекс ID
+const UserYandex = sequelize.define('usersYandex', {
+    id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
+    email: { type: DataTypes.STRING, unique: true, allowNull: false },
+    role: { type: DataTypes.STRING, defaultValue: "USER" },
+    created_at: { type: DataTypes.DATE, defaultValue: DataTypes.NOW }
+});
 
 // Экспорт моделей для использования в других частях приложения
 module.exports = {
     User,
     Announcement,
+    UserYandex, // Экспорт новой модели
 };
