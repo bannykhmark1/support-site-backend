@@ -1,7 +1,7 @@
 const Router = require('express');
 const { body } = require('express-validator');
 const router = new Router();
-const announcementController = require('../controllers/announcementController');
+const announcementController = require('../controllers/announcememntController');
 
 // Все пользователи могут создавать объявления
 router.post('/', [
