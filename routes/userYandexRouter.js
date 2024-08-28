@@ -1,6 +1,6 @@
 const Router = require('express');
 const router = new Router();
-const UserYandex = require('../models/UserYandex'); // Импортируем модель
+const { UserYandex } = require('../models/models');
 
 router.post('/auth/yandex', async (req, res) => {
   try {
