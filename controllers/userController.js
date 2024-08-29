@@ -1,6 +1,6 @@
 const nodemailer = require('nodemailer');
 const jwt = require('jsonwebtoken');
-const { User } = require('../models/models'); // Убедитесь, что путь к модели User корректен
+const { UserEmail } = require('../models/models'); // Убедитесь, что путь к модели User корректен
 const ApiError = require('../error/ApiError'); // Убедитесь, что путь к ApiError корректен
 
 // Создаем конфигурацию для Nodemailer

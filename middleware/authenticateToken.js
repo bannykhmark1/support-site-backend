@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken');
-const { User } = require('../models/models');
+const { UserEmail } = require('../models/models');
 
 module.exports = async (req, res, next) => {
     if (req.method === 'OPTIONS') return next(); // Пропуск OPTIONS запросов
