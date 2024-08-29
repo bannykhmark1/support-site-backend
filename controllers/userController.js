@@ -1,31 +1,11 @@
-const nodemailer = require('nodemailer');
-const jwt = require('jsonwebtoken');
-const { UserEmail } = require('../models/models'); // Убедитесь, что путь к модели UserEmail корректен
-const ApiError = require('../error/ApiError'); // Убедитесь, что путь к ApiError корректен
-
-// Создаем конфигурацию для Nodemailer
-const transporter = nodemailer.createTransport({
-    host: 'connect.smtp.bz', // Замените на ваш SMTP сервер
-    port: 587, // Порт для вашего SMTP сервера
-    secure: false, // Если используете TLS, измените на true
-    auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
-    },
-});
-
-const generateVerificationCode = () => {
-    return Math.floor(100000 + Math.random() * 900000).toString(); // Генерация 6-значного кода
-}
-
-const generateJwt = (id, email, role, name) => {
-    const payload = { id, email, role, name };
-    return jwt.sign(payload, process.env.SECRET_KEY, { expiresIn: '1h' });
-}
-
 class UserController {
     async sendVerificationCode(req, res, next) {
         const { email } = req.body;
+
+        // Проверяем, что email существует и имеет правильный формат
+        if (!email || !email.includes('@') || !email.includes('.')) {
+            return next(ApiError.badRequest('Некорректный формат email'));
+        }
 
         // Проверяем, что email принадлежит одному из разрешенных доменов
         const allowedDomains = ['reftp', 'hobbs-it', 'kurganmk'];
@@ -52,7 +32,7 @@ class UserController {
             from: process.env.EMAIL_USER,
             to: email,
             subject: 'Ваш код для входа',
-            text: `Ваш код для входа: ${verificationCode}. Код действителен 10 минут.` // Исправленный текст сообщения
+            text: `Ваш код для входа: ${verificationCode}. Код действителен 10 минут.`
         };
 
         try {
