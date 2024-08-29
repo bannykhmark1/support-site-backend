@@ -27,16 +27,10 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static(path.resolve(__dirname, 'static')));
 app.use(fileUpload({ createParentPath: true }));
-
 // Маршруты API
 app.use('/api', router);
 app.use('/api/user', userRouter);
 app.use('/api/announcements', announcementRouter);
-
-const userYandexRouter = require('./routes/userYandexRouter');
-
-app.use('/api/userYandex', userYandexRouter);
-
 
 // Обработка ошибок
 app.use(errorHandler);
