@@ -53,12 +53,26 @@ class UserController {
         await user.save();
 
         // Отправка кода на email
-        const mailOptions = {
-            from: process.env.EMAIL_USER,
-            to: email,
-            subject: 'Ваш код для входа',
-            text: `Ваш код для входа: ${verificationCode}. Код действителен 10 минут.`
-        };
+// Отправка кода на email с красивым оформлением
+const mailOptions = {
+    from: process.env.EMAIL_USER,
+    to: email,
+    subject: 'Ваш код для входа',
+    html: `
+        <div style="font-family: Arial, sans-serif; color: #333;">
+            <h2 style="color: #4CAF50;">Добро пожаловать!</h2>
+            <p>Ваш код для входа:</p>
+            <div style="font-size: 24px; font-weight: bold; color: #4CAF50;">
+                ${verificationCode}
+            </div>
+            <p>Код действителен в течение 10 минут.</p>
+            <hr style="border: 1px solid #4CAF50;">
+            <p>Если вы не запрашивали этот код, просто проигнорируйте это сообщение.</p>
+            <p>С уважением,<br/>Команда поддержки</p>
+        </div>
+    `
+};
+
 
         try {
             await transporter.sendMail(mailOptions);
