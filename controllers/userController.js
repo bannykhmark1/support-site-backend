@@ -5,7 +5,7 @@ const ApiError = require('../error/ApiError'); // Убедитесь, что п�
 
 // Создаем конфигурацию для Nodemailer
 const transporter = nodemailer.createTransport({
-    host: 'smtp.example.com', // Замените на ваш SMTP сервер
+    host: 'connect.smtp.bz', // Замените на ваш SMTP сервер
     port: 587, // Порт для вашего SMTP сервера
     secure: false, // Если используете TLS, измените на true
     auth: {
