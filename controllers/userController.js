@@ -52,7 +52,7 @@ class UserController {
             from: process.env.EMAIL_USER,
             to: email,
             subject: 'Ваш код для входа',
-            text: `Ваш код для входа: ${verificationCode}. Код действителен 10 минут.`
+            text: `Ваш код для входа: ${verificationCode}. Код действителен 10 минут.` // Исправленный текст сообщения
         };
 
         try {
