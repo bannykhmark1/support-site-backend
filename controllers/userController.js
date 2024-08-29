@@ -1,5 +1,26 @@
+const nodemailer = require('nodemailer');
+const jwt = require('jsonwebtoken');
+const { User } = require('../models/models'); // Убедитесь, что путь к модели User корректен
+const ApiError = require('../error/ApiError'); // Убедитесь, что путь к ApiError корректен
+
+// Создаем конфигурацию для Nodemailer
+const transporter = nodemailer.createTransport({
+    host: 'smtp.example.com', // Замените на ваш SMTP сервер
+    port: 587, // Порт для вашего SMTP сервера
+    secure: false, // Если используете TLS, измените на true
+    auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS,
+    },
+});
+
 const generateVerificationCode = () => {
     return Math.floor(100000 + Math.random() * 900000).toString(); // Генерация 6-значного кода
+}
+
+const generateJwt = (id, email, role, name) => {
+    const payload = { id, email, role, name };
+    return jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '1h' });
 }
 
 class UserController {
@@ -34,9 +55,13 @@ class UserController {
             text: `Ваш код для входа: ${verificationCode}. Код действителен 10 минут.`
         };
 
-        await transporter.sendMail(mailOptions);
-
-        return res.status(200).json({ message: 'Код отправлен на email' });
+        try {
+            await transporter.sendMail(mailOptions);
+            return res.status(200).json({ message: 'Код отправлен на email' });
+        } catch (error) {
+            console.error('Ошибка при отправке email:', error);
+            return next(ApiError.internal('Ошибка при отправке email'));
+        }
     }
 
     async verifyCode(req, res, next) {
