@@ -1,6 +1,6 @@
 const nodemailer = require('nodemailer');
 const jwt = require('jsonwebtoken');
-const { UserEmail } = require('../models/models'); // Убедитесь, что путь к модели User корректен
+const { UserEmail } = require('../models/models'); // Убедитесь, что путь к модели UserEmail корректен
 const ApiError = require('../error/ApiError'); // Убедитесь, что путь к ApiError корректен
 
 // Создаем конфигурацию для Nodemailer
@@ -34,10 +34,10 @@ class UserController {
             return next(ApiError.badRequest('Email не принадлежит разрешенному домену'));
         }
 
-        let user = await User.findOne({ where: { email } });
+        let user = await UserEmail.findOne({ where: { email } });
 
         if (!user) {
-            user = await User.create({ email, role: 'USER', name: '' });
+            user = await UserEmail.create({ email, role: 'USER', name: '' });
         }
 
         const verificationCode = generateVerificationCode();
@@ -67,7 +67,7 @@ class UserController {
     async verifyCode(req, res, next) {
         const { email, code } = req.body;
 
-        const user = await User.findOne({ where: { email } });
+        const user = await UserEmail.findOne({ where: { email } });
 
         if (!user || user.verificationCode !== code || new Date() > user.codeExpires) {
             return next(ApiError.badRequest('Неверный или истекший код'));
