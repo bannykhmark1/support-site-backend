@@ -20,7 +20,7 @@ const generateVerificationCode = () => {
 
 const generateJwt = (id, email, role, name) => {
     const payload = { id, email, role, name };
-    return jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '1h' });
+    return jwt.sign(payload, process.env.SECRET_KEY, { expiresIn: '1h' });
 }
 
 class UserController {
