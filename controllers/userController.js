@@ -83,6 +83,27 @@ const mailOptions = {
         }
     }
 
+    async setNewPassword(req, res, next) {
+        const { email, newPassword } = req.body;
+
+        try {
+            const user = await UserEmail.findOne({ where: { email } });
+
+            if (!user) {
+                return res.status(404).json({ message: 'Пользователь не найден' });
+            }
+
+            const hashedPassword = await bcrypt.hash(newPassword, 5); // Хешируем пароль
+            user.password = hashedPassword;
+            user.hasPermanentPassword = true; // Устанавливаем флаг постоянного пароля
+            await user.save();
+
+            return res.status(200).json({ message: 'Пароль успешно установлен' });
+        } catch (error) {
+            return next(ApiError.internal('Ошибка при установке пароля'));
+        }
+    }
+
     async verifyCode(req, res, next) {
         const { email, code } = req.body;
 

@@ -17,3 +17,11 @@ router.post(
 );
 
 module.exports = router;
+
+router.post(
+    '/changePassword',
+    authenticateToken,  // Проверка JWT токена для аутентифицированного пользователя
+    body('newPassword').isLength({ min: 6 }),  // Валидация нового пароля
+    userController.changePassword
+);
+

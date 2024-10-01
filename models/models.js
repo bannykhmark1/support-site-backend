@@ -15,7 +15,9 @@ const UserEmail = sequelize.define('user_email', {
     verificationCode: { type: DataTypes.STRING }, // Поле для хранения кода верификации
     codeExpires: { type: DataTypes.DATE }, // Поле для хранения времени истечения кода
     role: { type: DataTypes.STRING, defaultValue: "USER" },
-    name: { type: DataTypes.STRING, allowNull: false }
+    name: { type: DataTypes.STRING, allowNull: false },
+    password: { type: DataTypes.STRING, allowNull: true }, // Добавляем поле для хранения пароля
+    hasPermanentPassword: { type: DataTypes.BOOLEAN, defaultValue: false } // Добавляем флаг, что пароль постоянный
 });
 
 const Announcement = sequelize.define('announcement', {
