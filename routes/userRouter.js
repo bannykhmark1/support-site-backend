@@ -3,25 +3,38 @@ const { body } = require('express-validator');
 const router = new Router();
 const authenticateToken = require('../middleware/authenticateToken');
 const userController = require('../controllers/userController');
-const checkRole = require('../middleware/checkRoleMiddleware');  // Убедитесь, что путь корректный
 
+// Отправка кода верификации
 router.post(
     '/sendCode',
-    body('email').isEmail(),  // Добавляем валидацию email
+    body('email').isEmail(),
     userController.sendVerificationCode
 );
 
+// Верификация кода
 router.post(
     '/verifyCode',
     userController.verifyCode
 );
 
-module.exports = router;
-
+// Проверка статуса пароля
 router.post(
-    '/changePassword',
-    authenticateToken,  // Проверка JWT токена для аутентифицированного пользователя
-    body('newPassword').isLength({ min: 6 }),  // Валидация нового пароля
-    userController.changePassword
+    '/checkPasswordStatus',
+    userController.checkPasswordStatus
 );
 
+// Логин с паролем
+router.post(
+    '/loginWithPassword',
+    userController.loginWithPassword
+);
+
+// Установка нового пароля
+router.post(
+    '/setNewPassword',
+    authenticateToken, 
+    body('newPassword').isLength({ min: 6 }),
+    userController.setNewPassword
+);
+
+module.exports = router;
