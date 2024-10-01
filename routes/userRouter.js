@@ -32,7 +32,6 @@ router.post(
 // Установка нового пароля
 router.post(
     '/setNewPassword',
-    authenticateToken, 
     body('newPassword').isLength({ min: 6 }),
     userController.setNewPassword
 );
