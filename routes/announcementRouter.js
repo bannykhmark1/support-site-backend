@@ -19,7 +19,7 @@ router.put('/:id', [
     body('title').notEmpty().withMessage('Заголовок обязателен'),
     body('description').notEmpty().withMessage('Описание обязательно'),
     body('date').isISO8601().withMessage('Дата обязательна и должна быть в формате ISO8601'),
-    body('isResolved').isBoolean().withMessage('Поле должно быть булевым')
+    // body('isResolved').isBoolean().withMessage('Поле должно быть булевым')
 ], announcementController.update);
 
 router.delete('/:id', announcementController.delete);

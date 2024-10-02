@@ -35,26 +35,23 @@ class AnnouncementController {
         }
     }
 
-
     async update(req, res, next) {
-    try {
-        const { id } = req.params;
-        const { title, description, date, isResolved } = req.body; // Добавляем isResolved
-        const announcement = await Announcement.findByPk(id);
-        if (!announcement) {
-            return next(ApiError.notFound('Объявление не найдено'));
+        try {
+            const { id } = req.params;
+            const { title, description, date } = req.body;
+            const announcement = await Announcement.findByPk(id);
+            if (!announcement) {
+                return next(ApiError.notFound('Объявление не найдено'));
+            }
+            announcement.title = title;
+            announcement.description = description;
+            announcement.date = date;
+            await announcement.save();
+            return res.json(announcement);
+        } catch (error) {
+            return next(ApiError.internal('Ошибка при обновлении объявления'));
         }
-        announcement.title = title;
-        announcement.description = description;
-        announcement.date = date;
-        announcement.isResolved = isResolved; // Обновляем состояние
-        await announcement.save();
-        return res.json(announcement);
-    } catch (error) {
-        return next(ApiError.internal('Ошибка при обновлении объявления'));
     }
-}
-
 
     async delete(req, res, next) {
         try {
