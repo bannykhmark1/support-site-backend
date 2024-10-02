@@ -24,8 +24,8 @@ const Announcement = sequelize.define('announcement', {
     id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
     title: { type: DataTypes.STRING, allowNull: false },
     description: { type: DataTypes.TEXT, allowNull: false },
-    date: { type: DataTypes.DATE, allowNull: false },
-    isResolved: { type: DataTypes.BOOLEAN, defaultValue: false } 
+    date: { type: DataTypes.DATE, allowNull: false }
+    
 });
 
 module.exports = {
