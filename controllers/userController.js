@@ -88,20 +88,26 @@ class UserController {
 
     async loginWithPassword(req, res, next) {
         const { email, password } = req.body;
-
+    
         const user = await UserEmail.findOne({ where: { email } });
         if (!user) {
             return next(ApiError.badRequest('Пользователь не найден'));
         }
-
+    
+        if (!user.password) {
+            // Если пароль не установлен
+            return next(ApiError.badRequest('У вас не установлен постоянный пароль. Пожалуйста, воспользуйтесь входом через одноразовый код.'));
+        }
+    
         const isPasswordValid = await bcrypt.compare(password, user.password);
         if (!isPasswordValid) {
             return next(ApiError.badRequest('Неверный пароль'));
         }
-
+    
         const token = generateJwt(user.id, user.email, user.role, user.name);
         return res.json({ token });
     }
+    
 
     async setNewPassword(req, res, next) {
         const { email, newPassword } = req.body;
