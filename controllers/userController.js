@@ -30,7 +30,7 @@ class UserController {
             return next(ApiError.badRequest('Некорректный формат email'));
         }
 
-        const allowedDomains = ['reftp', 'hobbs-it', 'kurganmk'];
+        const allowedDomains = ['reftp', 'hobbs-it', 'kurganmk', 'skhp-ural'];
         const domain = email.split('@')[1].split('.')[0];
         if (!allowedDomains.includes(domain)) {
             return next(ApiError.badRequest('Email не принадлежит разрешенному домену'));
